@@ -1,0 +1,9 @@
+{
+  "name": "atelier-remorque",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Configurateur 3D statique de remorque vélo, inspiré du kit Wike Highsided.",
+  "scripts": { "dev": "node scripts/serve.mjs", "start": "node scripts/serve.mjs", "test": "node --test tests/*.test.mjs" },
+  "engines": { "node": ">=20" }
+}

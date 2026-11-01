@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#33483b">
+  <meta name="description" content="Imaginez votre remorque vélo sur mesure. Dimensions, matériaux et vue 3D autour du kit Wike Highsided.">
+  <title>Atelier Remorque — Votre remorque, à votre mesure.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="Atelier Remorque, accueil"><span class="brand-icon" aria-hidden="true">↳</span><span>atelier<span class="brand-light">remorque</span><small>LE PROJET COMMENCE ICI.</small></span></a>
+    <span class="header-context">Un kit. Vos idées. Votre remorque.</span>
+    <div class="header-actions"><button class="button subtle" id="share"><span aria-hidden="true">↗</span> Partager</button><button class="button primary" id="export"><span aria-hidden="true">↓</span> Ma liste de pièces</button></div>
+  </header>
+  <main>
+    <aside class="config-panel" aria-label="Configuration de la remorque">
+      <div class="intro"><div class="eyebrow">L’ATELIER / CONFIGURATEUR 3D</div><h1>À votre mesure.</h1><p>Dessinez la remorque qui suivra<br>tous vos projets.</p></div>
+      <div class="section-heading"><span class="step">01</span><h2>Le format</h2><span class="unit-badge">cm</span></div>
+      <div class="presets" aria-label="Formats de départ">
+        <button data-preset="compact">Compact</button><button data-preset="everyday" class="selected">Polyvalent</button><button data-preset="long">Long</button>
+      </div>
+      <div class="range-field"><label for="length">Longueur de la caisse</label><div class="number-wrap"><input id="length" type="number" min="60" max="160" step="1" data-number="length"><span>cm</span></div><input type="range" min="60" max="160" step="1" data-range="length" aria-label="Longueur de la caisse"><div class="range-limits"><span>60 cm</span><span>160 cm</span></div></div>
+      <div class="range-field"><label for="width">Largeur de la caisse</label><div class="number-wrap"><input id="width" type="number" min="45" max="100" step="1" data-number="width"><span>cm</span></div><input type="range" min="45" max="100" step="1" data-range="width" aria-label="Largeur de la caisse"><div class="range-limits"><span>45 cm</span><span>100 cm</span></div></div>
+      <div class="range-field"><label for="height">Hauteur de la caisse</label><div class="number-wrap"><input id="height" type="number" min="20" max="70" step="1" data-number="height"><span>cm</span></div><input type="range" min="20" max="70" step="1" data-range="height" aria-label="Hauteur de la caisse"><div class="range-limits"><span>20 cm</span><span>70 cm</span></div></div>
+      <p class="field-note">Dimensions extérieures du cadre, hors roues et timon.</p>
+      <div class="section-heading"><span class="step">02</span><h2>Les matériaux</h2></div>
+      <div class="select-row"><label for="frame">Tubes carrés · 25,4 mm</label><select id="frame"><option value="aluminium">Aluminium</option><option value="steel">Acier</option></select></div>
+      <div class="select-row"><label for="tubeWall">Épaisseur des tubes</label><select id="tubeWall"><option value="1.6">1,6 mm</option><option value="2">2 mm</option><option value="3">3 mm</option></select></div>
+      <div class="select-row"><label for="thickness">Contreplaqué</label><select id="thickness"><option value="6">6 mm</option><option value="9.5">9,5 mm</option><option value="12">12 mm</option><option value="15">15 mm</option><option value="18">18 mm</option></select></div>
+      <label class="toggle-row" for="floor"><span>Plancher<span class="secondary-label">Un fond pour votre chargement</span></span><input id="floor" type="checkbox" role="switch"></label>
+      <div class="section-heading"><span class="step">03</span><h2>Les parois</h2></div>
+      <div class="wall-choices" aria-label="Type de parois">
+        <button data-walls="solid"><svg viewBox="0 0 48 30" aria-hidden="true"><rect x="6" y="4" width="36" height="22" rx="1"/><path d="M6 4v22M42 4v22"/></svg>Pleines</button>
+        <button data-walls="slats"><svg viewBox="0 0 48 30" aria-hidden="true"><path d="M6 4v22M42 4v22"/><path d="M7 7h34M7 15h34M7 23h34"/></svg>À lattes</button>
+        <button data-walls="none"><svg viewBox="0 0 48 30" aria-hidden="true"><path d="M6 26V4h36v22Z"/></svg>Cadre nu</button>
+      </div>
+      <div class="finish-heading"><span>Finition des panneaux</span><span id="finish-label">Bois naturel</span></div>
+      <div class="swatches" aria-label="Finition des panneaux"><button data-finish="natural" style="--swatch:#c6a775" aria-label="Bois naturel"></button><button data-finish="forest" style="--swatch:#52664e" aria-label="Vert forêt"></button><button data-finish="sand" style="--swatch:#d5c8ac" aria-label="Sable"></button><button data-finish="charcoal" style="--swatch:#43484a" aria-label="Anthracite"></button></div>
+      <div class="sidebar-footer"><span id="save-status"><span class="status-dot"></span> Sauvegardé sur cet appareil</span><button id="reset" class="text-button">Réinitialiser</button></div>
+    </aside>
+    <section class="workspace" aria-label="Aperçu et détails">
+      <div class="viewer" id="viewer">
+        <div class="viewer-heading"><div><span class="eyebrow">VOTRE FUTURE REMORQUE</span><h2 id="model-name">La polyvalente.</h2></div><span class="live-badge"><i></i> VUE EN DIRECT</span></div>
+        <div id="scene-loading" role="status">Assemblage de votre remorque…</div><div id="canvas-host" aria-label="Modèle 3D interactif de la remorque"></div>
+        <div id="dimension-labels" aria-hidden="true"></div>
+        <div id="render-error" hidden><strong>La vue 3D n’a pas pu démarrer.</strong><p>Vérifiez que WebGL est disponible et ouvrez le site via un serveur HTTP. Les réglages et la liste de pièces restent utilisables.</p></div>
+        <div class="view-toolbar" aria-label="Orientation du modèle"><button disabled data-view="perspective" class="selected" aria-label="Vue en perspective" title="Perspective">3D</button><button disabled data-view="side" title="Vue de côté" aria-label="Vue de côté">Côté</button><button disabled data-view="top" title="Vue de dessus" aria-label="Vue de dessus">Dessus</button><span></span><button disabled id="snapshot" aria-label="Télécharger une image PNG" title="Télécharger une image PNG">▧</button></div>
+        <div class="viewer-bottom"><span class="orbit-hint"><span aria-hidden="true">↔</span> Glissez pour tourner · Défilez pour zoomer</span><div class="viewer-toggles"><button id="dimensions" aria-pressed="true">↔ Cotes</button><button id="exploded" aria-pressed="false">◇ Vue éclatée</button></div></div>
+      </div>
+      <div class="summary-bar"><div><span>CAISSE EXTÉRIEURE</span><strong id="size-stat">100 × 65 × 45 <small>cm</small></strong></div><div><span>TUBES À PRÉVOIR</span><strong id="tube-stat">—</strong></div><div><span>PANNEAUX</span><strong id="panel-stat">—</strong></div><div><span>MASSE DES MATÉRIAUX <sup title="Estimation hors kit Wike, visserie et peinture">ⓘ</sup></span><strong id="mass-stat">—</strong></div></div>
+      <section class="details-section">
+        <div class="details-title"><div><span class="eyebrow">DE L’IDÉE À L’ATELIER</span><h2>Ce qu’il vous faut.</h2></div><div class="project-actions"><input id="project-file" type="file" accept=".json,application/json" hidden><button class="text-button" id="import-json">Charger</button><button class="text-button" id="download-json">Enregistrer le projet <span aria-hidden="true">↓</span></button></div></div>
+        <div class="details-grid">
+          <div class="kit-card"><span class="kit-label">DÉJÀ DANS LE KIT</span><h3>La base Wike.</h3><p>4 coins de plateforme, 4 coins supérieurs et 2 supports de roue : modèles validés à partir de vos mesures. Roues de 20″, timon, attaches et réflecteurs.</p><a href="https://wikeinc.com/en-ca/products/wike-highsided-cargo-bike-trailer-diy-kit" target="_blank" rel="noopener noreferrer">Voir le kit du fabricant <span aria-hidden="true">↗</span></a></div>
+          <div class="parts-card"><div class="parts-heading"><h3>À ajouter vous-même</h3><span id="parts-count">— pièces</span></div><div class="table-scroll"><table><thead><tr><th>Pièce</th><th>Qté</th><th>Cotes nominales · mm</th></tr></thead><tbody id="parts-body"></tbody></table></div><p class="parts-note">Cotes indicatives du modèle : mesurer les emboîtements des raccords et les jeux avant toute découpe. Ajouter la visserie adaptée.</p></div>
+        </div>
+        <details class="assumptions"><summary>Comprendre le modèle et ses hypothèses <span>+</span></summary><p>Ce configurateur indépendant représente un assemblage simplifié, pas un plan de fabrication validé. Tubes de 25,4 mm, roues de 510 mm, raccords et timon approximatifs. Les plages de dimensions servent à explorer des formes ; elles ne constituent pas des limites approuvées par Wike.</p><p>Les panneaux sont placés à l’intérieur du cadre. Les lattes sont séparées par 20 mm. Le métrage des tubes et les surfaces excluent les pertes de découpe. Masse calculée avec 2 700 kg/m³ pour l’aluminium, 7 850 pour l’acier et 600 pour le contreplaqué ; kit, visserie et peinture exclus. Aucune capacité de charge n’est calculée.</p><p>Référence : fiche produit Wike consultée le 31 octobre 2026. L’épaisseur de 9,5 mm du plancher et les tubes carrés de 1″ proviennent de cette fiche ; les autres dimensions sont des choix de conception modifiables.</p></details>
+      </section>
+      <footer class="page-footer"><span>Conçu pour imaginer. Fabriqué à votre façon.</span><span>100 % local · Aucun compte requis</span></footer>
+    </section>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="share-dialog"><form method="dialog"><button class="dialog-close" aria-label="Fermer">×</button><h2>Votre configuration, à partager.</h2><p>Copiez ce lien pour retrouver les mêmes réglages.</p><input id="share-url" readonly aria-label="Lien de la configuration"><button class="button primary">Fermer</button></form></dialog>
+  <noscript>Activez JavaScript pour configurer la remorque et afficher la vue 3D.</noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
