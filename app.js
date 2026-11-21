@@ -1,4 +1,4 @@
-import { DEFAULTS, normalize, derive, configurationFromHash, configurationHash, cutListCsv } from './model.js';
+import { LIMITS, MM_PER_INCH, DEFAULTS, normalize, derive, configurationFromHash, configurationHash, cutListCsv } from './model.js';
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const STORAGE = 'atelier-remorque:configuration:v1';
@@ -12,6 +12,13 @@ const fmt = (value, max = 1) => value.toLocaleString('fr-CA', { maximumFractionD
 let state = { ...DEFAULTS }, view, toastTimer;
 try { state = normalize(JSON.parse(localStorage.getItem(STORAGE))); } catch { /* Defaults remain usable without storage. */ }
 state = configurationFromHash(location.hash) ?? state;
+const units = $('#units');
+try { if (localStorage.getItem('atelier-remorque:units') === 'imperial') units.value = 'imperial'; } catch {}
+const imperial = () => units.value === 'imperial';
+const displayCm = cm => imperial() ? cm * 10 / MM_PER_INCH : cm;
+const dimensionUnit = () => imperial() ? 'po' : 'cm';
+const dimensionLabel = cm => fmt(displayCm(cm), 3) + ' ' + dimensionUnit();
+const cutSize = mm => imperial() ? fmt(mm / MM_PER_INCH, 3) : fmt(mm);
 function toast(message) {
   $('#toast').textContent = message; $('#toast').classList.add('visible');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 3300);
@@ -29,16 +36,34 @@ function download(blob, name) {
 }
 function sync() {
   for (const key of ['length', 'width', 'height']) {
-    $('[data-number="' + key + '"]').value = state[key];
+    const input = $('#' + key);
+    const [min, max] = LIMITS[key].map(displayCm);
+    input.step = 'any';
+    input.min = min.toFixed(3);
+    input.max = max.toFixed(3);
+    if (document.activeElement !== input) input.value = Number(displayCm(state[key]).toFixed(3));
+    input.nextElementSibling.textContent = dimensionUnit();
+    const limits = input.closest('.range-field').querySelector('.range-limits');
+    limits.firstElementChild.textContent = dimensionLabel(LIMITS[key][0]);
+    limits.lastElementChild.textContent = dimensionLabel(LIMITS[key][1]);
     const range = $('[data-range="' + key + '"]');
-    range.value = state[key];
-    range.style.setProperty('--fill', ((state[key] - Number(range.min)) / (Number(range.max) - Number(range.min)) * 100) + '%');
+    range.min = input.min;
+    range.max = input.max;
+    range.step = 'any';
+    range.value = displayCm(state[key]);
+    range.setAttribute('aria-valuetext', dimensionLabel(state[key]));
+    range.style.setProperty('--fill', ((displayCm(state[key]) - min) / (max - min) * 100) + '%');
   }
   for (const key of ['frame', 'thickness', 'tubeWall']) {
     const select = $('#' + key);
     if (![...select.options].some(o => o.value === String(state[key]))) select.add(new Option(fmt(state[key]) + ' mm', String(state[key])));
+    if (key !== 'frame') for (const option of select.options) {
+      option.textContent = cutSize(Number(option.value)) + (imperial() ? ' po' : ' mm');
+    }
     select.value = String(state[key]);
   }
+  $('label[for="frame"]').textContent = 'Tubes carrés · ' + (imperial() ? '1 po' : '25,4 mm');
+  $('#cut-heading').textContent = 'Cotes nominales · ' + (imperial() ? 'po' : 'mm');
   $('#floor').checked = state.floor;
   for (const key of ['walls', 'finish']) for (const button of $$('[data-' + key + ']')) {
     const selected = button.dataset[key] === state[key];
@@ -57,15 +82,15 @@ function sync() {
   }
   $('#model-name').textContent = modelName;
   const d = derive(state);
-  $('#size-stat').innerHTML = fmt(state.length) + ' × ' + fmt(state.width) + ' × ' + fmt(state.height) + ' <small>cm</small>';
-  $('#tube-stat').innerHTML = fmt(d.tubeLength, 2) + ' <small>m linéaires</small>';
-  $('#panel-stat').innerHTML = fmt(d.panelArea, 2) + ' <small>m²</small>';
+  $('#size-stat').innerHTML = [state.length, state.width, state.height].map(v => fmt(displayCm(v), 3)).join(' × ') + ' <small>' + dimensionUnit() + '</small>';
+  $('#tube-stat').innerHTML = fmt(imperial() ? d.tubeLength / 0.3048 : d.tubeLength, 2) + (imperial() ? ' <small>pi linéaires</small>' : ' <small>m linéaires</small>');
+  $('#panel-stat').innerHTML = fmt(imperial() ? d.panelArea / 0.3048 ** 2 : d.panelArea, 2) + (imperial() ? ' <small>pi²</small>' : ' <small>m²</small>');
   $('#mass-stat').innerHTML = '≈ ' + fmt(d.materialMass) + ' <small>kg · hors kit</small>';
   const rows = [...d.tubes, ...d.panels];
   const body = $('#parts-body'); body.replaceChildren();
   for (const part of rows) {
     const row = document.createElement('tr');
-    const size = part.width ? fmt(part.length) + ' × ' + fmt(part.width) + ' × ' + fmt(part.thickness) : fmt(part.length);
+    const size = part.width ? cutSize(part.length) + ' × ' + cutSize(part.width) + ' × ' + cutSize(part.thickness) : cutSize(part.length);
     for (const value of [part.label, part.qty, size]) {
       const cell = document.createElement('td'); cell.textContent = String(value); row.append(cell);
     }
@@ -73,7 +98,7 @@ function sync() {
   }
   $('#parts-count').textContent = rows.reduce((n, p) => n + p.qty, 0) + ' pièces';
   persist();
-  view?.update(state);
+  view?.update(state, dimensionLabel);
 }
 function change(patch, fit = false) {
   state = normalize({ ...state, ...patch });
@@ -81,13 +106,24 @@ function change(patch, fit = false) {
   if (location.hash.startsWith('#config=')) history.replaceState(null, '', configurationHash(state));
   if (fit) view?.fit();
 }
-for (const input of $$('[data-range]')) input.addEventListener('input', () => change({ [input.dataset.range]: Number(input.value) }));
+units.addEventListener('change', () => {
+  try { localStorage.setItem('atelier-remorque:units', units.value); } catch {}
+  sync();
+});
+const toCm = n => imperial() ? n * MM_PER_INCH / 10 : n;
+for (const input of $$('[data-range]')) input.addEventListener('input', () => {
+  const value = Number(input.value);
+  const step = imperial() ? 0.125 : 1;
+  const snapped = value === Number(input.min) || value === Number(input.max) ? value : Math.round(value / step) * step;
+  change({ [input.dataset.range]: toCm(snapped) });
+});
 for (const input of $$('[data-number]')) input.addEventListener('input', () => {
-  if (input.validity.valid && Number.isFinite(input.valueAsNumber)) change({ [input.dataset.number]: input.valueAsNumber });
+  if (input.validity.valid && Number.isFinite(input.valueAsNumber)) change({ [input.dataset.number]: toCm(input.valueAsNumber) });
 });
 for (const input of $$('[data-number]')) input.addEventListener('change', () => {
   const number = input.valueAsNumber;
-  if (Number.isFinite(number)) change({ [input.dataset.number]: number }); else sync();
+  if (Number.isFinite(number)) change({ [input.dataset.number]: toCm(number) });
+  input.value = Number(displayCm(state[input.dataset.number]).toFixed(3));
 });
 for (const key of ['frame', 'thickness', 'tubeWall']) $('#' + key).addEventListener('change', event => change({ [key]: key === 'frame' ? event.target.value : Number(event.target.value) }));
 $('#floor').addEventListener('change', event => change({ floor: event.target.checked }));
@@ -109,7 +145,7 @@ $('#reset').addEventListener('click', () => {
   toast('Le modèle de départ est restauré.');
 });
 $('#export').addEventListener('click', () => {
-  download(new Blob([cutListCsv(state)], { type: 'text/csv;charset=utf-8' }), 'remorque-liste-pieces.csv');
+  download(new Blob([cutListCsv(state, imperial())], { type: 'text/csv;charset=utf-8' }), 'remorque-liste-pieces.csv');
   toast('Liste de pièces exportée.');
 });
 $('#download-json').addEventListener('click', () => {
@@ -148,7 +184,7 @@ sync();
 try {
   const { createScene } = await import('./scene.js');
   view = createScene($('#canvas-host'), $('#dimension-labels'));
-  view.update(state); view.fit();
+  view.update(state, dimensionLabel); view.fit();
   $('#scene-loading').hidden = true;
   for (const button of $$('[data-view], #snapshot')) button.disabled = false;
 } catch (error) {

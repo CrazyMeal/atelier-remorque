@@ -136,7 +136,7 @@ export function createScene(host, labelHost) {
     // Tire shoulder rings make the wheel readable from both directions.
     for (const side of [-1, 1]) mesh(new THREE.TorusGeometry(.232, .0025, 6, 72), mats.black, [0, 0, side * .021], group);
   }
-  function rebuild(s) {
+  function rebuild(s, dimensionLabel) {
     currentState = s;
     const d = derive(s);
     clear(assembly); clear(dimensions); labelHost.replaceChildren(); labels = [];
@@ -207,9 +207,9 @@ export function createScene(host, labelHost) {
     rod([tip[0] - .05, tip[1], tip[2]], tip, .019, mats.black);
     mesh(new THREE.TorusGeometry(.019, .006, 8, 20), mats.black, [tip[0] - .064, tip[1], tip[2]]).rotation.x = Math.PI / 2;
     if (s.dimensions && !s.exploded) {
-      dimension([-L / 2, .06, W / 2 + .20], [L / 2, .06, W / 2 + .20], s.length + ' cm');
-      dimension([L / 2 + .14, .06, -W / 2], [L / 2 + .14, .06, W / 2], s.width + ' cm');
-      dimension([L / 2 + .12, b - t / 2, -W / 2 - .10], [L / 2 + .12, b + H - t / 2, -W / 2 - .10], s.height + ' cm', [.06, 0, 0]);
+      dimension([-L / 2, .06, W / 2 + .20], [L / 2, .06, W / 2 + .20], dimensionLabel(s.length));
+      dimension([L / 2 + .14, .06, -W / 2], [L / 2 + .14, .06, W / 2], dimensionLabel(s.width));
+      dimension([L / 2 + .12, b - t / 2, -W / 2 - .10], [L / 2 + .12, b + H - t / 2, -W / 2 - .10], dimensionLabel(s.height), [.06, 0, 0]);
     }
     invalidate();
   }

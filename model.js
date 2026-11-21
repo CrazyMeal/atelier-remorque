@@ -52,14 +52,18 @@ export function configurationFromHash(hash) {
   try { return normalize(JSON.parse(decodeURIComponent(hash.slice(8)))); } catch { return null; }
 }
 export function configurationHash(state) { return '#config=' + encodeURIComponent(JSON.stringify(normalize(state))); }
-export function cutListCsv(state) {
+export const MM_PER_INCH = 25.4;
+export function cutListCsv(state, imperial = false) {
   const s = normalize(state), d = derive(s);
+  const unit = imperial ? 'po' : 'mm';
+  const size = mm => imperial ? (mm / MM_PER_INCH).toFixed(3) : mm.toFixed(1);
+  const section = imperial ? '1 po' : '25,4 mm';
   const rows = [
     ['Atelier Remorque — nomenclature indicative'],
     ['Cotes nominales du modèle. Retraits et emboîtements des raccords à mesurer avant découpe.'],
-    ['Pièce', 'Quantité', 'Longueur (mm)', 'Largeur (mm)', 'Épaisseur (mm)', 'Matériau'],
-    ...d.tubes.map(p => [p.label, p.qty, p.length.toFixed(1), TUBE, s.tubeWall, s.frame === 'steel' ? 'Acier — tube carré 25,4 mm' : 'Aluminium — tube carré 25,4 mm']),
-    ...d.panels.map(p => [p.label, p.qty, p.length.toFixed(1), p.width.toFixed(1), p.thickness, 'Contreplaqué']),
+    ['Pièce', 'Quantité', 'Longueur (' + unit + ')', 'Largeur (' + unit + ')', 'Épaisseur (' + unit + ')', 'Matériau'],
+    ...d.tubes.map(p => [p.label, p.qty, size(p.length), size(TUBE), size(s.tubeWall), (s.frame === 'steel' ? 'Acier' : 'Aluminium') + ' — tube carré ' + section]),
+    ...d.panels.map(p => [p.label, p.qty, size(p.length), size(p.width), size(p.thickness), 'Contreplaqué']),
     ['Kit Wike et visserie non inclus dans la masse estimée']
   ];
   return '\uFEFF' + rows.map(row => row.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(';')).join('\r\n');
