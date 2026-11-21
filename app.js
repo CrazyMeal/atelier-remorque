@@ -58,7 +58,7 @@ function sync() {
     const select = $('#' + key);
     if (![...select.options].some(o => o.value === String(state[key]))) select.add(new Option(fmt(state[key]) + ' mm', String(state[key])));
     if (key !== 'frame') for (const option of select.options) {
-      option.textContent = cutSize(Number(option.value)) + (imperial() ? ' po' : ' mm');
+      option.textContent = (imperial() ? cutSize(Number(option.value)) : fmt(Number(option.value), 3)) + (imperial() ? ' po' : ' mm');
     }
     select.value = String(state[key]);
   }
