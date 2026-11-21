@@ -144,15 +144,16 @@ export function createScene(host, labelHost) {
     const innerL = d.innerL / 1000, innerW = d.innerW / 1000, wallH = d.wallH / 1000;
     const b = .31, top = b + H - t, e = s.exploded ? .22 : 0;
     const metal = mats[s.frame], panel = s.finish === 'natural' ? mats.wood : mats[s.finish];
+    const [rail, cross, post] = d.tubes.map(tube => tube.length / 1000);
     for (const y of [b, top + e]) {
       for (const sign of [-1, 1]) {
-        box(innerL, t, t, [0, y, sign * (W - t) / 2], metal);
-        box(t, t, innerW, [sign * (L - t) / 2, y, 0], metal);
+        box(rail, t, t, [0, y, sign * (W - t) / 2], metal);
+        box(t, t, cross, [sign * (L - t) / 2, y, 0], metal);
       }
     }
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
       const x = sx * (L - t) / 2, z = sz * (W - t) / 2;
-      box(t, wallH, t, [x, b + (H - t) / 2, z], metal);
+      box(t, post, t, [x, b + (H - t) / 2, z], metal);
       // Map measured connector axes onto the frame. Anchor at blue passage center.
       function corner(factory,anchor,height,vertical){
         const part=factory();
@@ -168,9 +169,9 @@ export function createScene(host, labelHost) {
       corner(createKitPart1,58.95,b,-1);
       corner(createKitPart2,58.95,top+e,1);
     }
-    for(const sz of [-1,1])box(innerL,t,t,[0,b-.0824,sz*(W-t)/2],metal);
+    for(const sz of [-1,1])box(rail,t,t,[0,b-.0824,sz*(W-t)/2],metal);
     // Second transverse rail follows the second pair of lower-corner passages.
-    for(const sx of [-1,1])box(t,t,innerW,[sx*(L-t)/2,b-.0824,0],metal);    if (s.floor) box(innerL, p, innerW, [0, b + t / 2 - p / 2 + e * 1.8, 0], panel);
+    for(const sx of [-1,1])box(t,t,cross,[sx*(L-t)/2,b-.0824,0],metal);    if (s.floor) box(innerL, p, innerW, [0, b + t / 2 - p / 2 + e * 1.8, 0], panel);
     const count = s.walls === 'slats' ? d.slatCount : 1;
     const ph = s.walls === 'slats' ? d.slatHeight / 1000 : wallH;
     if (s.walls !== 'none') for (let n = 0; n < count; n++) {

@@ -7,8 +7,13 @@ test('default clear dimensions, quantities and total material lengths', () => {
   near(d.innerL, 949.2); near(d.innerW, 599.2); near(d.wallH, 399.2);
   assert.equal(d.tubes.reduce((n, p) => n + p.qty, 0), 16);
   assert.equal(d.panels.reduce((n, p) => n + p.qty, 0), 5);
-  near(d.tubeLength, 10.8872);
+  near(d.tubeLength, 11.7);
   near(d.panels[2].length, 580.2);
+});
+test('36 inch rails use only the selected end deduction', () => {
+  const config = {length: 36 * 2.54, width: 24 * 2.54, height: 20 * 2.54};
+  near(derive(config).tubeLength * 1000 / 25.4, 440);
+  near(derive({...config, railInset: 25.4}).tubes[0].length / 25.4, 34);
 });
 test('bare frame and optional floor remove all relevant panel material', () => {
   const empty = derive({ ...DEFAULTS, walls: 'none', floor: false });

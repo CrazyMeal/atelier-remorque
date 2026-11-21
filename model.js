@@ -1,10 +1,10 @@
 export const DEFAULTS = Object.freeze({
   length: 100, width: 65, height: 45, thickness: 9.5,
   walls: 'solid', floor: true, frame: 'aluminium', finish: 'natural',
-  tubeWall: 1.6, dimensions: true, exploded: false
+  railInset: 0, crossInset: 0, postInset: 0, tubeWall: 1.6, dimensions: true, exploded: false
 });
 export const TUBE = 25.4;
-export const LIMITS = { length: [60, 160], width: [45, 100], height: [20, 70], thickness: [6, 18], tubeWall: [1, 3] };
+export const LIMITS = { length: [60, 160], width: [45, 100], height: [20, 70], thickness: [6, 18], railInset: [0, 299], crossInset: [0, 224], postInset: [0, 99], tubeWall: [1, 3] };
 const choices = { walls: ['solid', 'slats', 'none'], frame: ['aluminium', 'steel'], finish: ['natural', 'forest', 'sand', 'charcoal'] };
 export function normalize(input = {}) {
   const result = { ...DEFAULTS };
@@ -23,9 +23,9 @@ export function derive(input) {
   const innerL = L - 2 * TUBE, innerW = W - 2 * TUBE;
   const wallH = H - 2 * TUBE;
   const tubes = [
-    { label: 'Longerons · deux niveaux bas + haut', qty: 6, length: innerL },
-    { label: 'Traverses · deux niveaux bas + haut', qty: 6, length: innerW },
-    { label: 'Montants', qty: 4, length: wallH }
+    { label: 'Longerons · deux niveaux bas + haut', qty: 6, length: L - 2 * s.railInset },
+    { label: 'Traverses · deux niveaux bas + haut', qty: 6, length: W - 2 * s.crossInset },
+    { label: 'Montants', qty: 4, length: H - 2 * s.postInset }
   ];
   const panels = [];
   if (s.floor) panels.push({ label: 'Plancher', qty: 1, length: innerL, width: innerW, thickness: s.thickness });

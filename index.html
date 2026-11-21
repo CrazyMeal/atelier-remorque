@@ -27,6 +27,11 @@
       <div class="range-field"><label for="width">Largeur de la caisse</label><div class="number-wrap"><input id="width" type="number" min="45" max="100" step="1" data-number="width"><span>cm</span></div><input type="range" min="45" max="100" step="1" data-range="width" aria-label="Largeur de la caisse"><div class="range-limits"><span>45 cm</span><span>100 cm</span></div></div>
       <div class="range-field"><label for="height">Hauteur de la caisse</label><div class="number-wrap"><input id="height" type="number" min="20" max="70" step="1" data-number="height"><span>cm</span></div><input type="range" min="20" max="70" step="1" data-range="height" aria-label="Hauteur de la caisse"><div class="range-limits"><span>20 cm</span><span>70 cm</span></div></div>
       <p class="field-note">Dimensions extérieures du cadre, hors roues et timon.</p>
+      <fieldset class="cut-offsets"><legend>Retrait par extrémité</legend><p class="field-note">Coupe = dimension de caisse moins deux fois le retrait mesuré.</p>
+        <label>Longerons<span><input aria-label="Retrait par extrémité · Longerons" data-inset="railInset" type="number" min="0" step="any"><small>mm</small></span></label>
+        <label>Traverses<span><input aria-label="Retrait par extrémité · Traverses" data-inset="crossInset" type="number" min="0" step="any"><small>mm</small></span></label>
+        <label>Montants<span><input aria-label="Retrait par extrémité · Montants" data-inset="postInset" type="number" min="0" step="any"><small>mm</small></span></label>
+      </fieldset>
       <div class="section-heading"><span class="step">02</span><h2>Les matériaux</h2></div>
       <div class="select-row"><label for="frame">Tubes carrés · 25,4 mm</label><select id="frame"><option value="aluminium">Aluminium</option><option value="steel">Acier</option></select></div>
       <div class="select-row"><label for="tubeWall">Épaisseur des tubes</label><select id="tubeWall"><option value="1.6">1,6 mm</option><option value="1.651">1,651 mm</option><option value="2">2 mm</option><option value="2.413">2,413 mm</option><option value="3">3 mm</option></select></div>
@@ -58,6 +63,24 @@
           <div class="kit-card"><span class="kit-label">DÉJÀ DANS LE KIT</span><h3>La base Wike.</h3><p>4 coins de plateforme, 4 coins supérieurs et 2 supports de roue : modèles validés à partir de vos mesures. Roues de 20″, timon, attaches et réflecteurs.</p><a href="https://wikeinc.com/en-ca/products/wike-highsided-cargo-bike-trailer-diy-kit" target="_blank" rel="noopener noreferrer">Voir le kit du fabricant <span aria-hidden="true">↗</span></a></div>
           <div class="parts-card"><div class="parts-heading"><h3>À ajouter vous-même</h3><span id="parts-count">— pièces</span></div><div class="table-scroll"><table><thead><tr><th>Pièce</th><th>Qté</th><th id="cut-heading">Cotes nominales · mm</th></tr></thead><tbody id="parts-body"></tbody></table></div><p class="parts-note">Cotes indicatives du modèle : mesurer les emboîtements des raccords et les jeux avant toute découpe. Ajouter la visserie adaptée.</p></div>
         </div>
+        <section class="parts-card stock-plan" id="stock-list">
+          <header class="stock-head"><h3>Plan de commande des tubes</h3><select id="stock-unit" aria-label="Unité des chutes"><option value="25.4">Pouces (po)</option><option value="1">Millimètres (mm)</option></select></header>
+          <div class="stock-columns"><div class="stock-editor">
+            <h4>Chutes disponibles</h4>
+            <div class="stock-row stock-labels"><span>Longueur</span><span>Quantité</span></div>
+            <div id="stock-rows"></div>
+            <template id="stock-row"><div class="stock-row"><input type="number" min="0" step="any" aria-label="Longueur de la chute" placeholder="Longueur"><input type="number" min="1" max="1000" step="1" aria-label="Quantité disponible" value="1"><button type="button" aria-label="Retirer la chute">×</button></div></template>
+            <button id="add-stock" class="button primary">+ Ajouter une chute</button>
+            <details class="stock-settings"><summary>Paramètres de coupe</summary><label>Trait de scie<input id="kerf" type="number" min="0" step="any" value="0.125"></label><label>Tolérance par barre<input id="allowance" type="number" min="0" step="any" value="0.5"></label></details>
+          </div><div class="stock-preview"><h4>Découpes dans les chutes retenues</h4><div id="stock-result" aria-live="polite"></div><button id="sample-stock" class="text-button">Essayer avec quatre chutes ↗</button></div></div>
+          <section class="suggest-order"><h4>Panier à commander</h4>
+            <details class="stock-settings"><summary>Tarif et précision du fournisseur</summary>
+              <label>Prix de 12 po avant rabais ($ CA)<input type="number" step="0.01" min="0.01" id="price-12" value="8.24"></label><label>Prix de 36 po avant rabais ($ CA)<input type="number" step="0.01" min="0.01" id="base-price" value="20.60"></label>
+              <label><span>Prévoir une recoupe pour la tolérance de ±⅛ po</span><input type="checkbox" id="trim-custom" checked></label>
+              <p>Exemple fournisseur · 1 à 96 po par pas de ⅛ po. Prix estimés par interpolation ou extrapolation des deux tarifs saisis, hors taxes et livraison. Rabais par longueur identique : 2+ (3 %), 3+ (5 %), 5+ (8 %), 8+ (10 %), 12+ (11 %).</p></details>
+            <div id="suggest-result" aria-live="polite"></div>
+          </section>
+        </section>
         <details class="assumptions"><summary>Comprendre le modèle et ses hypothèses <span>+</span></summary><p>Ce configurateur indépendant représente un assemblage simplifié, pas un plan de fabrication validé. Tubes de 25,4 mm, roues de 510 mm, raccords et timon approximatifs. Les plages de dimensions servent à explorer des formes ; elles ne constituent pas des limites approuvées par Wike.</p><p>Les panneaux sont placés à l’intérieur du cadre. Les lattes sont séparées par 20 mm. Le métrage des tubes et les surfaces excluent les pertes de découpe. Masse calculée avec 2 700 kg/m³ pour l’aluminium, 7 850 pour l’acier et 600 pour le contreplaqué ; kit, visserie et peinture exclus. Aucune capacité de charge n’est calculée.</p><p>Référence : fiche produit Wike consultée le 31 octobre 2026. L’épaisseur de 9,5 mm du plancher et les tubes carrés de 1″ proviennent de cette fiche ; les autres dimensions sont des choix de conception modifiables.</p></details>
       </section>
       <footer class="page-footer"><span>Conçu pour imaginer. Fabriqué à votre façon.</span><span>100 % local · Aucun compte requis</span></footer>
